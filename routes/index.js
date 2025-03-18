@@ -10,6 +10,6 @@ router.use("/users", userRoutes);
 router.use("/services", serviceRoutes);
 router.use("/company", companyRoutes);
 router.use("/contact", contactRoutes);
-router.use("/media", mediaRoutes);
+router.use("/media_upload", mediaRoutes);
 
 module.exports = router;

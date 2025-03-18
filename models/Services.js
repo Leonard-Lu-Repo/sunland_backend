@@ -1,23 +1,17 @@
 const mongoose = require("mongoose");
 const serviceSchema = new mongoose.Schema({
-  name: {
+  title: {
     type: String,
     required: true,
   },
-  description: {
-    type: String,
-  },
-  carousel: {
-    type: Array,
-    title: String,
-  },
-  album: {
-    type: Array,
-    title: String,
-  },
-  videos: {
-    type: Array,
-    title: String,
+  cover: String,
+  description: String,
+  carousel: [String],
+  album: [String], // 存储相册图片 URL
+  video: String,
+  isDeleted: {
+    type: Boolean,
+    default: false,
   },
 });
 module.exports = mongoose.model("Services", serviceSchema);
