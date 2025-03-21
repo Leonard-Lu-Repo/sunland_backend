@@ -4,7 +4,6 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    console.log(req.body);
     const service = new Service({
       title: req.body.title,
       cover: req.body.cover,
@@ -82,8 +81,6 @@ router.delete("/", async (req, res) => {
 });
 router.put("/", async (req, res) => {
   try {
-    console.log("req", req.body);
-
     const { serviceId } = req.body;
     const updatedService = await Service.findByIdAndUpdate(
       serviceId,
