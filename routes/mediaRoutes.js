@@ -1,10 +1,16 @@
 require("dotenv").config();
 const express = require("express");
+const ffmpeg = require("fluent-ffmpeg");
+const ffmpegPath = require("@ffmpeg-installer/ffmpeg").path;
+const fs = require("fs");
+const path = require("path");
+ffmpeg.setFfmpegPath(ffmpegPath);
 const multer = require("multer");
 const multerS3 = require("multer-s3");
 const {
   DeleteObjectCommand,
   DeleteObjectsCommand,
+  PutObjectCommand,
 } = require("@aws-sdk/client-s3");
 const s3 = require("../s3Config");
 const router = express.Router();
@@ -30,12 +36,72 @@ const upload = multer({
 router.post("/single", upload.single("file"), async (req, res) => {
   try {
     // 上传成功，返回文件链接
-    res.status(200).json({ success: true, picture: req.file.location });
+    res.status(200).json({ success: true, url: req.file.location });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, message: "File upload failed" });
   }
 });
+// 替换原来的 single_video 接口
+router.post(
+  "/single_video",
+  multer({ dest: "uploads/" }).single("file"),
+  async (req, res) => {
+    const file = req.file;
+    const isMp4 = file.mimetype === "video/mp4";
+    const fileNameNoExt = path.parse(file.originalname).name;
+    const timestamp = Date.now();
+    const mp4FileName = `${fileNameNoExt}-${timestamp}.mp4`;
+    const outputPath = path.join("uploads", mp4FileName);
+
+    try {
+      let finalPath = file.path;
+
+      // 如果不是 mp4，进行转码
+      if (!isMp4) {
+        await new Promise((resolve, reject) => {
+          ffmpeg(file.path)
+            .outputOptions(["-c:v libx264", "-preset veryfast", "-crf 23"]) // 可选：控制清晰度和速度
+            .toFormat("mp4")
+            .output(outputPath)
+            .on("end", () => {
+              console.log("转码完成：", outputPath);
+              finalPath = outputPath;
+              resolve();
+            })
+            .on("error", reject)
+            .run();
+        });
+
+        // 删除原始非 MP4 文件
+        fs.unlinkSync(file.path);
+      }
+
+      // 上传转码后的视频到 S3
+      const fileBuffer = fs.readFileSync(finalPath);
+      const s3Key = `${mp4FileName}`;
+      const uploadResult = await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: s3Key,
+          Body: fileBuffer,
+          ContentType: "video/mp4",
+        })
+      );
+
+      // 删除本地文件
+      fs.unlinkSync(finalPath);
+
+      // 构建 S3 公共链接
+      const s3Url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${s3Key}`;
+      res.status(200).json({ success: true, url: s3Url });
+    } catch (error) {
+      console.error("视频上传失败:", error);
+      res.status(500).json({ success: false, message: "视频上传失败" });
+    }
+  }
+);
+
 router.delete("/single", async (req, res) => {
   try {
     const { fileUrl } = req.body; // 现在接收多个文件的 URL 数组
@@ -78,21 +144,11 @@ router.post("/multiple", upload.array("files", 12), async (req, res) => {
   try {
     // 上传成功，返回文件链接
     const files = req.files.map((file, index) => {
-      console.log("文件:", file.originalname);
-      console.log("宽度:", req.body[`width_${index}`]);
-      console.log("高度:", req.body[`height_${index}`]);
-
-      return {
-        url: file.location,
-        fileName: file.originalname,
-        height: req.body[`height_${index}`],
-        width: req.body[`width_${index}`],
-        ratio: req.body[`ratio_${index}`],
-      };
+      return { url: file.location };
     });
-    res.json({
+    res.status(200).json({
       success: true,
-      files: files,
+      fileUrls: files,
     });
   } catch (error) {
     console.log(error);

@@ -6,8 +6,8 @@ router.post("/", async (req, res) => {
   try {
     const service = new Service({
       title: req.body.title,
-      cover: req.body.cover,
-      description: req.body.description ? req.body.description : "",
+      cover: req.body.cover ?? "",
+      description: req.body.description ?? "",
     });
     const newService = await service.save();
     const res_data = {
@@ -82,6 +82,8 @@ router.delete("/", async (req, res) => {
 router.put("/", async (req, res) => {
   try {
     const { serviceId } = req.body;
+    console.log("body", req.body);
+
     const updatedService = await Service.findByIdAndUpdate(
       serviceId,
       req.body,

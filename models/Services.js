@@ -7,7 +7,14 @@ const serviceSchema = new mongoose.Schema({
   cover: String,
   description: String,
   carousel: [String],
-  album: [String], // 存储相册图片 URL
+  points: [
+    {
+      pointNum: Number,
+      pointTitle: String,
+      pointParagraph: String,
+      pointPhoto: String,
+    },
+  ],
   video: String,
   isDeleted: {
     type: Boolean,
