@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
     // 1. 构造邮件内容
     const mailOptions = {
       from: process.env.EMAIL_USER, // 发件人
-      to: "xinglonglu565@gmail.com", // 收件人（改成你的邮箱）
+      to: "hughsun7@gmail.com", // 收件人（改成你的邮箱）
       subject: "您有新的报价单需要处理",
       html: `
         <h2>您有新的报价单需要处理</h2>
