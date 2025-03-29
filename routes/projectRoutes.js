@@ -111,7 +111,6 @@ router.get("/search", async (req, res) => {
 
     if (keyword) {
       const keywords = keyword.trim().split(/\s+/).filter(Boolean); // 按空格拆分关键字
-      console.log("keyword", keywords);
       query.$and = keywords.map((word) => ({
         $or: [
           { title: { $regex: word, $options: "i" } },

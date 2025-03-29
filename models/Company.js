@@ -8,5 +8,12 @@ const companySchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  socialMedia: [
+    {
+      mediaNum: Number,
+      icon: String,
+      link: String,
+    },
+  ],
 });
 module.exports = mongoose.model("Company", companySchema);

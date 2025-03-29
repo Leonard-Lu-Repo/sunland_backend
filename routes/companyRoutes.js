@@ -4,12 +4,12 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    // console.log(req.body);
     const updatedCompany = await Company.findOneAndUpdate(
       {}, // 查询条件为空，表示匹配第一个找到的文档
       {
         phone: req.body.phone,
         email: req.body.email,
+        socialMedia: req.body.socialMedia,
       },
       {
         new: true, // 返回更新后的文档
@@ -18,7 +18,11 @@ router.post("/", async (req, res) => {
     );
     const res_data = {
       message: "Company updated successfully",
-      company: { email: updatedCompany.email, phone: updatedCompany.phone },
+      company: {
+        email: updatedCompany.email,
+        phone: updatedCompany.phone,
+        socialMedia: updatedCompany.socialMedia,
+      },
     };
     res.status(200).json(res_data);
   } catch (error) {
@@ -34,6 +38,7 @@ router.get("/", async (req, res) => {
       company: {
         email: company.email,
         phone: company.phone,
+        socialMedia: company.socialMedia,
       },
     };
 

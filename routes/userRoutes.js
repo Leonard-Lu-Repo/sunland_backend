@@ -4,7 +4,6 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    console.log(req.body);
     const user = new User({
       name: req.body.name,
       age: req.body.age,

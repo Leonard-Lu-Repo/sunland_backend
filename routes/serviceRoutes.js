@@ -82,7 +82,6 @@ router.delete("/", async (req, res) => {
 router.put("/", async (req, res) => {
   try {
     const { serviceId } = req.body;
-    console.log("body", req.body);
 
     const updatedService = await Service.findByIdAndUpdate(
       serviceId,

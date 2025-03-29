@@ -105,9 +105,6 @@ router.post(
 router.delete("/single", async (req, res) => {
   try {
     const { fileUrl } = req.body; // 现在接收多个文件的 URL 数组
-    // console.log(" req.body", req.body);
-    // console.log(" req", req);
-    console.log(" fileUrl", fileUrl);
 
     if (!fileUrl) {
       return res
@@ -117,7 +114,6 @@ router.delete("/single", async (req, res) => {
 
     // 解析 S3 的文件 Key
     const objectToDelete = fileUrl.match(/[^/]+$/)[0] ?? null;
-    console.log("objectToDelete", objectToDelete);
 
     if (objectToDelete.length === 0) {
       return res
@@ -160,7 +156,6 @@ router.post("/multiple", upload.array("files", 12), async (req, res) => {
 router.delete("/", async (req, res) => {
   try {
     const { fileUrls } = req.body; // 现在接收多个文件的 URL 数组
-    console.log("fileUrls", fileUrls);
 
     if (!fileUrls || !Array.isArray(fileUrls) || fileUrls.length === 0) {
       return res
@@ -184,7 +179,6 @@ router.delete("/", async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid file URLs" });
     }
-    console.log("objectsToDelete", objectsToDelete);
 
     const command = new DeleteObjectsCommand({
       Bucket: process.env.AWS_S3_BUCKET_NAME,
